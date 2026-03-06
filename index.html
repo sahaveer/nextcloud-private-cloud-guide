@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Build Your Own Private Cloud - Nextcloud Guide</title>
+
+<style>
+
+:root{
+--bg:#f7f9fc;
+--sidebar:#1e2a38;
+--accent:#2b6cb0;
+--code:#f1f4f8;
+}
+
+body{
+margin:0;
+font-family:Segoe UI, Arial;
+background:var(--bg);
+display:flex;
+}
+
+.sidebar{
+width:260px;
+background:var(--sidebar);
+color:white;
+height:100vh;
+position:fixed;
+overflow:auto;
+padding:25px;
+}
+
+.sidebar h2{
+font-size:20px;
+margin-bottom:20px;
+}
+
+.sidebar a{
+display:block;
+color:white;
+text-decoration:none;
+margin:8px 0;
+font-size:14px;
+opacity:.85;
+}
+
+.sidebar a:hover{
+opacity:1;
+}
+
+.main{
+margin-left:260px;
+padding:40px;
+max-width:1000px;
+}
+
+h1{
+color:#1e2a38;
+}
+
+h2{
+margin-top:50px;
+color:#2b6cb0;
+}
+
+.code{
+background:var(--code);
+padding:14px;
+border-radius:6px;
+font-family:monospace;
+position:relative;
+margin:12px 0;
+}
+
+.copy{
+position:absolute;
+right:10px;
+top:8px;
+font-size:12px;
+cursor:pointer;
+color:#444;
+}
+
+.diagram{
+background:#eaf1ff;
+padding:20px;
+border-radius:6px;
+text-align:center;
+font-family:monospace;
+margin:20px 0;
+}
+
+.tip{
+background:#e9fff0;
+border-left:5px solid green;
+padding:15px;
+margin:20px 0;
+}
+
+.warn{
+background:#fff5e6;
+border-left:5px solid orange;
+padding:15px;
+margin:20px 0;
+}
+
+table{
+border-collapse:collapse;
+width:100%;
+margin:15px 0;
+}
+
+th,td{
+border:1px solid #ddd;
+padding:10px;
+}
+
+th{
+background:#eef2ff;
+}
+
+.faq{
+background:white;
+border-radius:6px;
+padding:15px;
+margin:10px 0;
+cursor:pointer;
+border:1px solid #ddd;
+}
+
+.answer{
+display:none;
+padding:10px;
+color:#444;
+}
+
+.dark{
+background:#0f1720;
+color:white;
+}
+
+button{
+padding:8px 14px;
+margin:10px 0;
+cursor:pointer;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+
+<h2>Nextcloud Guide</h2>
+
+<a href="#why">Why Build Your Own Cloud</a>
+<a href="#requirements">Computer Requirements</a>
+<a href="#install">Install Software</a>
+<a href="#docker">Docker Setup</a>
+<a href="#nextcloud">Nextcloud Installation</a>
+<a href="#tunnel">Cloudflare Tunnel</a>
+<a href="#upload">Upload Files</a>
+<a href="#backup">Backup Strategy</a>
+<a href="#faq">Troubleshooting</a>
+
+<button onclick="toggleDark()">Toggle Dark Mode</button>
+
+</div>
+
+<div class="main">
+
+<h1>Build Your Own Private Cloud</h1>
+<p>Self Hosted Nextcloud Guide (Docker + Cloudflare Tunnel)</p>
+
+---
+
+<h2 id="why">Why Build Your Own Cloud</h2>
+
+<table>
+
+<tr>
+<th>Service</th>
+<th>Free Storage</th>
+<th>Typical Plan</th>
+<th>Cost</th>
+</tr>
+
+<tr>
+<td>Google Drive</td>
+<td>15GB</td>
+<td>100GB</td>
+<td>₹1300/year</td>
+</tr>
+
+<tr>
+<td>iCloud</td>
+<td>5GB</td>
+<td>200GB</td>
+<td>₹2700/year</td>
+</tr>
+
+<tr>
+<td>Dropbox</td>
+<td>2GB</td>
+<td>2TB</td>
+<td>₹10000/year</td>
+</tr>
+
+</table>
+
+<div class="tip">
+Instead of paying subscriptions, run your own cloud server.
+</div>
+
+---
+
+<h2>System Architecture</h2>
+
+<div class="diagram">
+
+Your Computer  
+↓  
+Docker Container  
+↓  
+Nextcloud  
+↓  
+Cloudflare Tunnel  
+↓  
+Secure Public URL  
+
+</div>
+
+---
+
+<h2 id="requirements">Computer Requirements</h2>
+
+<table>
+
+<tr><th>Requirement</th><th>Recommendation</th></tr>
+<tr><td>Operating System</td><td>Windows 10 / 11</td></tr>
+<tr><td>RAM</td><td>8GB+</td></tr>
+<tr><td>CPU</td><td>64-bit</td></tr>
+<tr><td>Storage</td><td>50GB free</td></tr>
+
+</table>
+
+---
+
+<h2 id="install">Install Docker</h2>
+
+Download:
+
+<div class="code">
+https://www.docker.com/products/docker-desktop/
+</div>
+
+Verify:
+
+<div class="code">
+<span class="copy" onclick="copy(this)">copy</span>
+docker version
+</div>
+
+Example output:
+
+<div class="code">
+Client: Docker Engine  
+Server: Docker Engine
+</div>
+
+---
+
+<h2 id="docker">Create Docker Volumes</h2>
+
+<div class="code">
+<span class="copy" onclick="copy(this)">copy</span>
+docker volume create nextcloud_data
+docker volume create nextcloud_db
+</div>
+
+---
+
+<h2>Create Network</h2>
+
+<div class="code">
+<span class="copy" onclick="copy(this)">copy</span>
+docker network create nextcloud_net
+</div>
+
+---
+
+<h2 id="nextcloud">Start Database</h2>
+
+<div class="code">
+<span class="copy" onclick="copy(this)">copy</span>
+docker run -d ^
+--name nextcloud-db ^
+--network nextcloud_net ^
+-e MYSQL_ROOT_PASSWORD=RootPass123 ^
+-e MYSQL_DATABASE=nextcloud ^
+-e MYSQL_USER=nextcloud ^
+-e MYSQL_PASSWORD=NextcloudPass ^
+-v nextcloud_db:/var/lib/mysql ^
+mariadb:10.6
+</div>
+
+---
+
+<h2>Start Nextcloud</h2>
+
+<div class="code">
+<span class="copy" onclick="copy(this)">copy</span>
+docker run -d ^
+--name nextcloud ^
+--network nextcloud_net ^
+-p 8080:80 ^
+-v nextcloud_data:/var/www/html ^
+-v D:/CloudStorage:/mnt/cloud ^
+nextcloud:28
+</div>
+
+---
+
+<h2 id="tunnel">Install Cloudflare Tunnel</h2>
+
+<div class="code">
+<span class="copy" onclick="copy(this)">copy</span>
+docker run -d ^
+--name cloudflared ^
+--network nextcloud_net ^
+cloudflare/cloudflared ^
+tunnel --url http://nextcloud:80
+</div>
+
+Example output:
+
+<div class="code">
+https://random-server.trycloudflare.com
+</div>
+
+---
+
+<h2 id="upload">Upload Files</h2>
+
+<ul>
+<li>Browser upload</li>
+<li>Nextcloud mobile app</li>
+<li>Copy to local folder</li>
+</ul>
+
+Example folder:
+
+<div class="code">
+D:\CloudStorage
+</div>
+
+---
+
+<h2 id="backup">Backup Strategy</h2>
+
+Backup this folder:
+
+<div class="code">
+D:\CloudStorage
+</div>
+
+Recommended backup:
+
+<ul>
+<li>External HDD</li>
+<li>NAS</li>
+<li>Another PC</li>
+</ul>
+
+---
+
+<h2 id="faq">FAQ & Troubleshooting</h2>
+
+<div class="faq" onclick="toggle(this)">
+Docker command not working
+<div class="answer">
+Run:<br>
+docker version
+</div>
+</div>
+
+<div class="faq" onclick="toggle(this)">
+Nextcloud page not loading
+<div class="answer">
+Check containers:<br>
+docker ps
+</div>
+</div>
+
+<div class="faq" onclick="toggle(this)">
+Tunnel link not working
+<div class="answer">
+Check logs:<br>
+docker logs cloudflared
+</div>
+</div>
+
+</div>
+
+<script>
+
+function copy(btn){
+let code=btn.parentElement.innerText.replace("copy","");
+navigator.clipboard.writeText(code)
+btn.innerText="copied"
+setTimeout(()=>btn.innerText="copy",1000)
+}
+
+function toggle(el){
+let ans=el.querySelector(".answer")
+ans.style.display=ans.style.display==="block"?"none":"block"
+}
+
+function toggleDark(){
+document.body.classList.toggle("dark")
+}
+
+</script>
+
+</body>
+</html>
