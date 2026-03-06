@@ -123,6 +123,18 @@ border-radius:6px;
 <a href="#nextcloud">Run Nextcloud</a>
 <a href="#local">Open Local Cloud</a>
 
+<a href="#stage2intro">Stage 2 Overview</a>
+<a href="#powershelladmin">Open PowerShell Admin</a>
+<a href="#installtunnel">Install Cloudflare Tunnel</a>
+<a href="#portcheck">Check Nextcloud Port</a>
+<a href="#portfree">Check Port Availability</a>
+<a href="#firewall">Allow Port in Firewall</a>
+<a href="#createtunnel">Create Tunnel</a>
+<a href="#configfile">Create config.yml</a>
+<a href="#runtunnel">Run Tunnel</a>
+<a href="#publicurl">Access From Internet</a>
+
+  
 </div>
 
 <div class="main">
@@ -548,16 +560,293 @@ You should see the **Nextcloud setup screen**.
 </div>
 
 <div class="step">
-
 <h2>Stage 1 Complete</h2>
-
 Your personal cloud server is now running locally.
-
 Next we will connect it to the internet using Cloudflare Tunnel.
+</div>
+</div>
+
+
+<div class="step" id="stage2intro">
+
+<h1>Stage 2 — Access Your Cloud From Anywhere</h1>
+
+<p>In Stage 1 your cloud worked only inside your computer.</p>
+
+<div class="code">
+http://localhost:8080
+</div>
+
+<p>Now we will expose it to the internet safely using <b>Cloudflare Tunnel</b>.</p>
+
+<div class="output">
+
+Your Computer
+      │
+      ▼
+Nextcloud (Docker)
+      │
+      ▼
+Cloudflare Tunnel
+      │
+      ▼
+Internet
+      │
+      ▼
+https://yourcloud.domain.com
 
 </div>
 
 </div>
+
+<div class="step" id="powershelladmin">
+
+<h2>Step 1 — Open PowerShell (Administrator)</h2>
+
+<ol>
+<li>Click Start Menu</li>
+<li>Search <b>powershell</b></li>
+<li>Right click <b>Windows PowerShell</b></li>
+<li>Select <b>Run as Administrator</b></li>
+</ol>
+
+Expected screen:
+
+<div class="output">
+PS C:\WINDOWS\system32>
+</div>
+
+</div>
+
+
+<div class="step" id="installtunnel">
+
+<h2>Step 2 — Install Cloudflare Tunnel</h2>
+
+<div class="label">WHERE TO RUN</div>
+
+<div class="code">PowerShell (Administrator)</div>
+
+<div class="label">INPUT</div>
+
+<div class="code">
+<span class="copy" onclick="copy(this)">copy</span>
+winget install Cloudflare.cloudflared
+</div>
+
+<div class="label">EXPECTED OUTPUT</div>
+
+<div class="output">
+Successfully installed cloudflared
+</div>
+
+</div>
+
+
+<div class="step" id="portcheck">
+
+<h2>Step 3 — Check Which Port Nextcloud Uses</h2>
+
+<div class="label">WHERE TO RUN</div>
+
+<div class="code">PowerShell</div>
+
+<div class="label">INPUT</div>
+
+<div class="code">
+<span class="copy" onclick="copy(this)">copy</span>
+docker ps
+</div>
+
+<div class="label">EXPECTED OUTPUT</div>
+
+<div class="output">
+
+CONTAINER ID IMAGE PORTS
+abc123 nextcloud 0.0.0.0:8080->80/tcp
+
+</div>
+
+Your local cloud is accessible at:
+
+<div class="code">
+http://localhost:8080
+</div>
+
+</div>
+
+<div class="step" id="portfree">
+
+<h2>Step 4 — Ensure Port Is Free</h2>
+
+<div class="label">INPUT</div>
+
+<div class="code">
+<span class="copy" onclick="copy(this)">copy</span>
+netstat -ano | findstr :8080
+</div>
+
+<div class="label">EXPECTED OUTPUT</div>
+
+<div class="output">
+
+(no output)
+
+</div>
+
+If you see a process using the port, you can choose another port like:
+
+<div class="code">
+8081
+</div>
+
+</div>
+
+<div class="step" id="firewall">
+
+<h2>Step 5 — Allow Port in Windows Firewall</h2>
+
+<div class="label">WHERE TO RUN</div>
+
+<div class="code">PowerShell (Administrator)</div>
+
+<div class="label">INPUT</div>
+
+<div class="code">
+<span class="copy" onclick="copy(this)">copy</span>
+New-NetFirewallRule -DisplayName "Nextcloud Port 8080" -Direction Inbound -LocalPort 8080 -Protocol TCP -Action Allow
+</div>
+
+<div class="label">EXPECTED OUTPUT</div>
+
+<div class="output">
+
+Name : Nextcloud Port 8080
+Enabled : True
+
+</div>
+
+</div>
+
+<div class="step" id="createtunnel">
+
+<h2>Step 6 — Create Cloudflare Tunnel</h2>
+
+<div class="code">
+<span class="copy" onclick="copy(this)">copy</span>
+cloudflared tunnel create nextcloud-tunnel
+</div>
+
+Expected output:
+
+<div class="output">
+
+Tunnel credentials written to:
+
+C:\Users\YourName\.cloudflared
+
+</div>
+
+</div>
+
+<div class="step" id="configfile">
+
+<h2>Step 7 — Create config.yml</h2>
+
+Navigate to tunnel folder:
+
+<div class="code">
+<span class="copy" onclick="copy(this)">copy</span>
+cd C:\Users\YourName\.cloudflared
+</div>
+
+Create configuration file:
+
+<div class="code">
+<span class="copy" onclick="copy(this)">copy</span>
+notepad config.yml
+</div>
+
+Paste this configuration:
+
+<div class="code">
+
+tunnel: nextcloud-tunnel
+credentials-file: C:\Users\YourName\.cloudflared\abc123.json
+
+ingress:
+  - hostname: cloud.yourdomain.com
+    service: http://localhost:8080
+  - service: http_status:404
+
+</div>
+
+Save the file.
+
+</div>
+
+<div class="step" id="configfile">
+
+<h2>Step 7 — Create config.yml</h2>
+
+Navigate to tunnel folder:
+
+<div class="code">
+<span class="copy" onclick="copy(this)">copy</span>
+cd C:\Users\YourName\.cloudflared
+</div>
+
+Create configuration file:
+
+<div class="code">
+<span class="copy" onclick="copy(this)">copy</span>
+notepad config.yml
+</div>
+
+Paste this configuration:
+
+<div class="code">
+
+tunnel: nextcloud-tunnel
+credentials-file: C:\Users\YourName\.cloudflared\abc123.json
+
+ingress:
+  - hostname: cloud.yourdomain.com
+    service: http://localhost:8080
+  - service: http_status:404
+
+</div>
+
+Save the file.
+
+</div>
+
+<div class="step" id="publicurl">
+
+<h2>Step 9 — Access Your Cloud From Anywhere</h2>
+
+Open your domain:
+
+<div class="code">
+https://cloud.yourdomain.com
+</div>
+
+You should see the Nextcloud login screen.
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 <script>
 
@@ -572,3 +861,8 @@ setTimeout(()=>btn.innerText="copy",1000);
 
 </body>
 </html>
+
+
+
+
+
