@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Stage 1 — Local Nextcloud Setup</title>
+<title>Stage 1 — Run Your Cloud Locally</title>
 
 <style>
 
 body{
-font-family:Arial, sans-serif;
+font-family:Segoe UI, Arial;
 margin:0;
 background:#f5f7fb;
 }
@@ -18,63 +18,91 @@ position:fixed;
 height:100%;
 background:#1e2a38;
 color:white;
-padding:20px;
+padding:25px;
+}
+
+.sidebar h2{
+font-size:18px;
 }
 
 .sidebar a{
 display:block;
 color:white;
 text-decoration:none;
-margin:8px 0;
+margin:10px 0;
 font-size:14px;
+opacity:.85;
+}
+
+.sidebar a:hover{
+opacity:1;
 }
 
 .main{
 margin-left:260px;
 padding:40px;
-max-width:1000px;
+max-width:950px;
 }
 
-h1,h2{
+h1{
 color:#1f3c88;
 }
 
 .step{
 background:white;
-padding:25px;
-border-radius:8px;
+padding:28px;
+border-radius:10px;
 margin-bottom:30px;
-box-shadow:0 2px 8px rgba(0,0,0,0.08);
+box-shadow:0 3px 12px rgba(0,0,0,0.08);
 }
 
-.block{
+.sectionlabel{
+font-weight:bold;
+margin-top:15px;
+}
+
+.code{
 background:#eef2ff;
-padding:12px;
+padding:14px;
 border-radius:6px;
 font-family:monospace;
 margin:10px 0;
+position:relative;
 }
 
 .output{
 background:#f3f4f6;
-padding:12px;
+padding:14px;
 border-radius:6px;
 font-family:monospace;
 margin:10px 0;
 }
 
-details{
-margin-top:10px;
-background:#fafafa;
-padding:10px;
-border-radius:6px;
+.copy{
+position:absolute;
+right:10px;
+top:8px;
+font-size:12px;
+cursor:pointer;
+color:#333;
 }
 
 .progress{
 background:#e6ecff;
-padding:15px;
-border-radius:8px;
-margin-bottom:25px;
+padding:18px;
+border-radius:10px;
+margin-bottom:35px;
+}
+
+details{
+margin-top:15px;
+background:#fafafa;
+padding:12px;
+border-radius:6px;
+}
+
+ol{
+padding-left:20px;
 }
 
 </style>
@@ -88,14 +116,14 @@ margin-bottom:25px;
 <h2>Stage 1 Guide</h2>
 
 <a href="#requirements">Computer Requirements</a>
-<a href="#network">Network Preparation</a>
+<a href="#ip">Check IP Address</a>
 <a href="#powershell">Open PowerShell</a>
 <a href="#wsl">Install WSL</a>
-<a href="#node">Install Node.js</a>
+<a href="#node">Install Node</a>
 <a href="#docker">Install Docker</a>
-<a href="#networkdocker">Create Docker Network</a>
+<a href="#network">Docker Network</a>
 <a href="#nextcloud">Run Nextcloud</a>
-<a href="#local">Access Local Cloud</a>
+<a href="#local">Open Local Cloud</a>
 
 </div>
 
@@ -115,59 +143,55 @@ Stage 3 — Cloud Usage ░░░░░░░░░░
 
 </div>
 
----
+<!-- REQUIREMENTS -->
 
 <div class="step" id="requirements">
 
 <h2>Step 1 — Computer Requirements</h2>
 
-Ensure your computer meets these requirements.
-
-☐ Windows 10 or Windows 11  
-☐ 64-bit processor  
-☐ 8 GB RAM recommended  
-☐ 50 GB free storage  
-☐ Stable internet connection  
+<ul>
+<li>Windows 10 or Windows 11</li>
+<li>64-bit processor</li>
+<li>8 GB RAM recommended</li>
+<li>50 GB free storage</li>
+<li>Stable internet connection</li>
+</ul>
 
 <details>
 <summary>Why these requirements matter</summary>
 
-Docker containers require virtualization and enough memory to run smoothly.
+Docker containers require virtualization and enough memory to run properly.
 
 </details>
 
 </div>
 
----
+<!-- IP CHECK -->
 
-<div class="step" id="network">
+<div class="step" id="ip">
 
 <h2>Step 2 — Check Your IP Address</h2>
 
-<b>WHERE TO RUN</b>
+<div class="sectionlabel">WHERE TO RUN</div>
 
-<div class="block">
-Command Prompt
-</div>
+<div class="code">Command Prompt</div>
 
-<b>HOW TO OPEN</b>
+<div class="sectionlabel">HOW TO OPEN</div>
 
-1 Click Start Menu  
-2 Type
+<ol>
+<li>Click the Start Menu</li>
+<li>Type <b>cmd</b></li>
+<li>Click <b>Command Prompt</b></li>
+</ol>
 
-<div class="block">
-cmd
-</div>
+<div class="sectionlabel">INPUT</div>
 
-3 Click **Command Prompt**
-
-<b>INPUT</b>
-
-<div class="block">
+<div class="code">
+<span class="copy" onclick="copy(this)">copy</span>
 ipconfig
 </div>
 
-<b>EXPECTED OUTPUT</b>
+<div class="sectionlabel">EXPECTED OUTPUT</div>
 
 <div class="output">
 
@@ -179,42 +203,31 @@ Default Gateway : 192.168.29.1
 
 </div>
 
-Restart your computer and run the command again.
-
-If the IP stays the same, your static IP is working.
+Restart your PC and run the command again to confirm the IP stays the same.
 
 <details>
 <summary>Why static IP is important</summary>
 
-Servers should keep the same IP address so applications can always reach them.
+Servers should keep the same IP address so services can always reach them.
 
 </details>
 
 </div>
 
----
+<!-- POWERSHELL -->
 
 <div class="step" id="powershell">
 
 <h2>Step 3 — Open PowerShell (Administrator)</h2>
 
-1 Click **Start Menu**
+<ol>
+<li>Click the Start Menu</li>
+<li>Search for <b>powershell</b></li>
+<li>Right click <b>Windows PowerShell</b></li>
+<li>Select <b>Run as Administrator</b></li>
+</ol>
 
-2 Search for
-
-<div class="block">
-powershell
-</div>
-
-3 Right click **Windows PowerShell**
-
-4 Click
-
-<div class="block">
-Run as Administrator
-</div>
-
-<b>EXPECTED SCREEN</b>
+<div class="sectionlabel">EXPECTED SCREEN</div>
 
 <div class="output">
 
@@ -227,31 +240,30 @@ PS C:\WINDOWS\system32>
 <details>
 <summary>What is PowerShell?</summary>
 
-PowerShell is a command-line interface used to run system commands.
+PowerShell is a command-line interface used to control Windows and run system commands.
 
 </details>
 
 </div>
 
----
+<!-- WSL -->
 
 <div class="step" id="wsl">
 
 <h2>Step 4 — Install WSL</h2>
 
-<b>WHERE TO RUN</b>
+<div class="sectionlabel">WHERE TO RUN</div>
 
-<div class="block">
-PowerShell (Administrator)
-</div>
+<div class="code">PowerShell (Administrator)</div>
 
-<b>INPUT</b>
+<div class="sectionlabel">INPUT</div>
 
-<div class="block">
+<div class="code">
+<span class="copy" onclick="copy(this)">copy</span>
 wsl --install
 </div>
 
-<b>EXPECTED OUTPUT</b>
+<div class="sectionlabel">EXPECTED OUTPUT</div>
 
 <div class="output">
 
@@ -261,18 +273,11 @@ Restart required
 
 </div>
 
-Restart your computer after installation.
-
-<details>
-<summary>What is WSL?</summary>
-
-WSL allows Linux tools to run inside Windows and is required by Docker.
-
-</details>
+Restart your computer once installation finishes.
 
 </div>
 
----
+<!-- NODE -->
 
 <div class="step" id="node">
 
@@ -280,49 +285,31 @@ WSL allows Linux tools to run inside Windows and is required by Docker.
 
 Download from
 
-<div class="block">
-https://nodejs.org
-</div>
+<div class="code">https://nodejs.org</div>
 
 Choose
 
-<div class="block">
-LTS version (x64)
-</div>
+<div class="code">LTS version (x64)</div>
 
-<b>VERIFY INSTALLATION</b>
+<div class="sectionlabel">VERIFY INSTALLATION</div>
 
-<b>WHERE TO RUN</b>
-
-<div class="block">
-PowerShell
-</div>
-
-<b>INPUT</b>
-
-<div class="block">
+<div class="code">
+<span class="copy" onclick="copy(this)">copy</span>
 node -v
 </div>
 
-<b>EXPECTED OUTPUT</b>
+<div class="output">v20.x.x</div>
 
-<div class="output">
-v20.x.x
-</div>
-
-Now check npm
-
-<div class="block">
+<div class="code">
+<span class="copy" onclick="copy(this)">copy</span>
 npm -v
 </div>
 
-<div class="output">
-10.x.x
-</div>
+<div class="output">10.x.x</div>
 
 </div>
 
----
+<!-- DOCKER -->
 
 <div class="step" id="docker">
 
@@ -330,95 +317,66 @@ npm -v
 
 Download from
 
-<div class="block">
+<div class="code">
 https://www.docker.com/products/docker-desktop
-</div>
-
-Choose
-
-<div class="block">
-Docker Desktop for Windows (x64)
 </div>
 
 After installation restart your computer.
 
-<b>VERIFY DOCKER</b>
+<div class="sectionlabel">VERIFY DOCKER</div>
 
-<b>WHERE TO RUN</b>
-
-<div class="block">
-PowerShell
-</div>
-
-<b>INPUT</b>
-
-<div class="block">
+<div class="code">
+<span class="copy" onclick="copy(this)">copy</span>
 docker --version
 </div>
 
-<b>EXPECTED OUTPUT</b>
-
 <div class="output">
+
 Docker version 24.x.x
-</div>
 
 </div>
 
----
+</div>
 
-<div class="step" id="networkdocker">
+<!-- NETWORK -->
+
+<div class="step" id="network">
 
 <h2>Step 7 — Create Docker Network</h2>
 
-<b>WHERE TO RUN</b>
+<div class="sectionlabel">WHERE TO RUN</div>
 
-<div class="block">
-PowerShell (Administrator)
-</div>
+<div class="code">PowerShell (Administrator)</div>
 
-<b>INPUT</b>
+<div class="sectionlabel">INPUT</div>
 
-<div class="block">
+<div class="code">
+<span class="copy" onclick="copy(this)">copy</span>
 docker network create nextcloud_net
 </div>
 
-<b>EXPECTED OUTPUT</b>
+<div class="sectionlabel">EXPECTED OUTPUT</div>
 
 <div class="output">
-f8a1b3e6d3b1f7c9e5c8
-</div>
-
-Verify network
-
-<div class="block">
-docker network ls
-</div>
-
-<div class="output">
-
-NETWORK ID NAME DRIVER  
-abcd1234 bridge bridge  
-efgh5678 nextcloud_net bridge  
-
+f8a1b3e6d3b1f7c9e5c8...
 </div>
 
 </div>
 
----
+<!-- NEXTCLOUD -->
 
 <div class="step" id="nextcloud">
 
 <h2>Step 8 — Run Nextcloud Container</h2>
 
-<b>WHERE TO RUN</b>
+<div class="sectionlabel">WHERE TO RUN</div>
 
-<div class="block">
-PowerShell
-</div>
+<div class="code">PowerShell</div>
 
-<b>INPUT</b>
+<div class="sectionlabel">INPUT</div>
 
-<div class="block">
+<div class="code">
+<span class="copy" onclick="copy(this)">copy</span>
 
 docker run -d ^
 --name nextcloud ^
@@ -428,13 +386,12 @@ nextcloud
 
 </div>
 
-<b>VERIFY</b>
+<div class="sectionlabel">VERIFY</div>
 
-<div class="block">
+<div class="code">
+<span class="copy" onclick="copy(this)">copy</span>
 docker ps
 </div>
-
-<b>EXPECTED OUTPUT</b>
 
 <div class="output">
 
@@ -445,7 +402,7 @@ abc123 nextcloud nextcloud
 
 </div>
 
----
+<!-- LOCAL -->
 
 <div class="step" id="local">
 
@@ -453,21 +410,15 @@ abc123 nextcloud nextcloud
 
 Open your browser and go to
 
-<div class="block">
-http://localhost:8080
-</div>
+<div class="code">http://localhost:8080</div>
 
 or
 
-<div class="block">
-http://192.168.29.143:8080
-</div>
+<div class="code">http://192.168.29.143:8080</div>
 
-You should see the **Nextcloud setup screen**.
+You should see the **Nextcloud setup page**.
 
 </div>
-
----
 
 <div class="step">
 
@@ -475,11 +426,22 @@ You should see the **Nextcloud setup screen**.
 
 Your personal cloud server is now running locally.
 
-Next we will expose it to the internet using Cloudflare Tunnel.
+Next we will expose the server to the internet using Cloudflare Tunnel.
 
 </div>
 
 </div>
+
+<script>
+
+function copy(btn){
+let code=btn.parentElement.innerText.replace("copy","");
+navigator.clipboard.writeText(code);
+btn.innerText="copied";
+setTimeout(()=>btn.innerText="copy",1000);
+}
+
+</script>
 
 </body>
 </html>
