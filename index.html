@@ -2,37 +2,23 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Build Your Own Private Cloud - Nextcloud Guide</title>
+<title>Stage 1 — Local Nextcloud Setup</title>
 
 <style>
 
-:root{
---bg:#f7f9fc;
---sidebar:#1e2a38;
---accent:#2b6cb0;
---code:#f1f4f8;
-}
-
 body{
+font-family:Arial, sans-serif;
 margin:0;
-font-family:Segoe UI, Arial;
-background:var(--bg);
-display:flex;
+background:#f5f7fb;
 }
 
 .sidebar{
 width:260px;
-background:var(--sidebar);
-color:white;
-height:100vh;
 position:fixed;
-overflow:auto;
-padding:25px;
-}
-
-.sidebar h2{
-font-size:20px;
-margin-bottom:20px;
+height:100%;
+background:#1e2a38;
+color:white;
+padding:20px;
 }
 
 .sidebar a{
@@ -41,11 +27,6 @@ color:white;
 text-decoration:none;
 margin:8px 0;
 font-size:14px;
-opacity:.85;
-}
-
-.sidebar a:hover{
-opacity:1;
 }
 
 .main{
@@ -54,374 +35,451 @@ padding:40px;
 max-width:1000px;
 }
 
-h1{
-color:#1e2a38;
+h1,h2{
+color:#1f3c88;
 }
 
-h2{
-margin-top:50px;
-color:#2b6cb0;
-}
-
-.code{
-background:var(--code);
-padding:14px;
-border-radius:6px;
-font-family:monospace;
-position:relative;
-margin:12px 0;
-}
-
-.copy{
-position:absolute;
-right:10px;
-top:8px;
-font-size:12px;
-cursor:pointer;
-color:#444;
-}
-
-.diagram{
-background:#eaf1ff;
-padding:20px;
-border-radius:6px;
-text-align:center;
-font-family:monospace;
-margin:20px 0;
-}
-
-.tip{
-background:#e9fff0;
-border-left:5px solid green;
-padding:15px;
-margin:20px 0;
-}
-
-.warn{
-background:#fff5e6;
-border-left:5px solid orange;
-padding:15px;
-margin:20px 0;
-}
-
-table{
-border-collapse:collapse;
-width:100%;
-margin:15px 0;
-}
-
-th,td{
-border:1px solid #ddd;
-padding:10px;
-}
-
-th{
-background:#eef2ff;
-}
-
-.faq{
+.step{
 background:white;
+padding:25px;
+border-radius:8px;
+margin-bottom:30px;
+box-shadow:0 2px 8px rgba(0,0,0,0.08);
+}
+
+.block{
+background:#eef2ff;
+padding:12px;
 border-radius:6px;
-padding:15px;
+font-family:monospace;
 margin:10px 0;
-cursor:pointer;
-border:1px solid #ddd;
 }
 
-.answer{
-display:none;
+.output{
+background:#f3f4f6;
+padding:12px;
+border-radius:6px;
+font-family:monospace;
+margin:10px 0;
+}
+
+details{
+margin-top:10px;
+background:#fafafa;
 padding:10px;
-color:#444;
+border-radius:6px;
 }
 
-.dark{
-background:#0f1720;
-color:white;
-}
-
-button{
-padding:8px 14px;
-margin:10px 0;
-cursor:pointer;
+.progress{
+background:#e6ecff;
+padding:15px;
+border-radius:8px;
+margin-bottom:25px;
 }
 
 </style>
+
 </head>
 
 <body>
 
 <div class="sidebar">
 
-<h2>Nextcloud Guide</h2>
+<h2>Stage 1 Guide</h2>
 
-<a href="#why">Why Build Your Own Cloud</a>
 <a href="#requirements">Computer Requirements</a>
-<a href="#install">Install Software</a>
-<a href="#docker">Docker Setup</a>
-<a href="#nextcloud">Nextcloud Installation</a>
-<a href="#tunnel">Cloudflare Tunnel</a>
-<a href="#upload">Upload Files</a>
-<a href="#backup">Backup Strategy</a>
-<a href="#faq">Troubleshooting</a>
-
-<button onclick="toggleDark()">Toggle Dark Mode</button>
+<a href="#network">Network Preparation</a>
+<a href="#powershell">Open PowerShell</a>
+<a href="#wsl">Install WSL</a>
+<a href="#node">Install Node.js</a>
+<a href="#docker">Install Docker</a>
+<a href="#networkdocker">Create Docker Network</a>
+<a href="#nextcloud">Run Nextcloud</a>
+<a href="#local">Access Local Cloud</a>
 
 </div>
 
 <div class="main">
 
-<h1>Build Your Own Private Cloud</h1>
-<p>Self Hosted Nextcloud Guide (Docker + Cloudflare Tunnel)</p>
+<h1>Stage 1 — Run Your Cloud Locally</h1>
 
----
+<div class="progress">
 
-<h2 id="why">Why Build Your Own Cloud</h2>
+<b>SETUP PROGRESS</b>
 
-<table>
-
-<tr>
-<th>Service</th>
-<th>Free Storage</th>
-<th>Typical Plan</th>
-<th>Cost</th>
-</tr>
-
-<tr>
-<td>Google Drive</td>
-<td>15GB</td>
-<td>100GB</td>
-<td>₹1300/year</td>
-</tr>
-
-<tr>
-<td>iCloud</td>
-<td>5GB</td>
-<td>200GB</td>
-<td>₹2700/year</td>
-</tr>
-
-<tr>
-<td>Dropbox</td>
-<td>2GB</td>
-<td>2TB</td>
-<td>₹10000/year</td>
-</tr>
-
-</table>
-
-<div class="tip">
-Instead of paying subscriptions, run your own cloud server.
-</div>
-
----
-
-<h2>System Architecture</h2>
-
-<div class="diagram">
-
-Your Computer  
-↓  
-Docker Container  
-↓  
-Nextcloud  
-↓  
-Cloudflare Tunnel  
-↓  
-Secure Public URL  
+<p>
+Stage 1 — Local Server ███████░░░ <br>
+Stage 2 — Public URL ░░░░░░░░░░ <br>
+Stage 3 — Cloud Usage ░░░░░░░░░░
+</p>
 
 </div>
 
 ---
 
-<h2 id="requirements">Computer Requirements</h2>
+<div class="step" id="requirements">
 
-<table>
+<h2>Step 1 — Computer Requirements</h2>
 
-<tr><th>Requirement</th><th>Recommendation</th></tr>
-<tr><td>Operating System</td><td>Windows 10 / 11</td></tr>
-<tr><td>RAM</td><td>8GB+</td></tr>
-<tr><td>CPU</td><td>64-bit</td></tr>
-<tr><td>Storage</td><td>50GB free</td></tr>
+Ensure your computer meets these requirements.
 
-</table>
+☐ Windows 10 or Windows 11  
+☐ 64-bit processor  
+☐ 8 GB RAM recommended  
+☐ 50 GB free storage  
+☐ Stable internet connection  
 
----
+<details>
+<summary>Why these requirements matter</summary>
 
-<h2 id="install">Install Docker</h2>
+Docker containers require virtualization and enough memory to run smoothly.
 
-Download:
+</details>
 
-<div class="code">
-https://www.docker.com/products/docker-desktop/
-</div>
-
-Verify:
-
-<div class="code">
-<span class="copy" onclick="copy(this)">copy</span>
-docker version
-</div>
-
-Example output:
-
-<div class="code">
-Client: Docker Engine  
-Server: Docker Engine
 </div>
 
 ---
 
-<h2 id="docker">Create Docker Volumes</h2>
+<div class="step" id="network">
 
-<div class="code">
-<span class="copy" onclick="copy(this)">copy</span>
-docker volume create nextcloud_data
-docker volume create nextcloud_db
+<h2>Step 2 — Check Your IP Address</h2>
+
+<b>WHERE TO RUN</b>
+
+<div class="block">
+Command Prompt
+</div>
+
+<b>HOW TO OPEN</b>
+
+1 Click Start Menu  
+2 Type
+
+<div class="block">
+cmd
+</div>
+
+3 Click **Command Prompt**
+
+<b>INPUT</b>
+
+<div class="block">
+ipconfig
+</div>
+
+<b>EXPECTED OUTPUT</b>
+
+<div class="output">
+
+Ethernet adapter Ethernet
+
+IPv4 Address : 192.168.29.143  
+Subnet Mask : 255.255.255.0  
+Default Gateway : 192.168.29.1  
+
+</div>
+
+Restart your computer and run the command again.
+
+If the IP stays the same, your static IP is working.
+
+<details>
+<summary>Why static IP is important</summary>
+
+Servers should keep the same IP address so applications can always reach them.
+
+</details>
+
 </div>
 
 ---
 
-<h2>Create Network</h2>
+<div class="step" id="powershell">
 
-<div class="code">
-<span class="copy" onclick="copy(this)">copy</span>
+<h2>Step 3 — Open PowerShell (Administrator)</h2>
+
+1 Click **Start Menu**
+
+2 Search for
+
+<div class="block">
+powershell
+</div>
+
+3 Right click **Windows PowerShell**
+
+4 Click
+
+<div class="block">
+Run as Administrator
+</div>
+
+<b>EXPECTED SCREEN</b>
+
+<div class="output">
+
+Windows PowerShell
+
+PS C:\WINDOWS\system32>
+
+</div>
+
+<details>
+<summary>What is PowerShell?</summary>
+
+PowerShell is a command-line interface used to run system commands.
+
+</details>
+
+</div>
+
+---
+
+<div class="step" id="wsl">
+
+<h2>Step 4 — Install WSL</h2>
+
+<b>WHERE TO RUN</b>
+
+<div class="block">
+PowerShell (Administrator)
+</div>
+
+<b>INPUT</b>
+
+<div class="block">
+wsl --install
+</div>
+
+<b>EXPECTED OUTPUT</b>
+
+<div class="output">
+
+Installing: Windows Subsystem for Linux  
+Installing: Virtual Machine Platform  
+Restart required  
+
+</div>
+
+Restart your computer after installation.
+
+<details>
+<summary>What is WSL?</summary>
+
+WSL allows Linux tools to run inside Windows and is required by Docker.
+
+</details>
+
+</div>
+
+---
+
+<div class="step" id="node">
+
+<h2>Step 5 — Install Node.js and npm</h2>
+
+Download from
+
+<div class="block">
+https://nodejs.org
+</div>
+
+Choose
+
+<div class="block">
+LTS version (x64)
+</div>
+
+<b>VERIFY INSTALLATION</b>
+
+<b>WHERE TO RUN</b>
+
+<div class="block">
+PowerShell
+</div>
+
+<b>INPUT</b>
+
+<div class="block">
+node -v
+</div>
+
+<b>EXPECTED OUTPUT</b>
+
+<div class="output">
+v20.x.x
+</div>
+
+Now check npm
+
+<div class="block">
+npm -v
+</div>
+
+<div class="output">
+10.x.x
+</div>
+
+</div>
+
+---
+
+<div class="step" id="docker">
+
+<h2>Step 6 — Install Docker Desktop</h2>
+
+Download from
+
+<div class="block">
+https://www.docker.com/products/docker-desktop
+</div>
+
+Choose
+
+<div class="block">
+Docker Desktop for Windows (x64)
+</div>
+
+After installation restart your computer.
+
+<b>VERIFY DOCKER</b>
+
+<b>WHERE TO RUN</b>
+
+<div class="block">
+PowerShell
+</div>
+
+<b>INPUT</b>
+
+<div class="block">
+docker --version
+</div>
+
+<b>EXPECTED OUTPUT</b>
+
+<div class="output">
+Docker version 24.x.x
+</div>
+
+</div>
+
+---
+
+<div class="step" id="networkdocker">
+
+<h2>Step 7 — Create Docker Network</h2>
+
+<b>WHERE TO RUN</b>
+
+<div class="block">
+PowerShell (Administrator)
+</div>
+
+<b>INPUT</b>
+
+<div class="block">
 docker network create nextcloud_net
 </div>
 
----
+<b>EXPECTED OUTPUT</b>
 
-<h2 id="nextcloud">Start Database</h2>
+<div class="output">
+f8a1b3e6d3b1f7c9e5c8
+</div>
 
-<div class="code">
-<span class="copy" onclick="copy(this)">copy</span>
-docker run -d ^
---name nextcloud-db ^
---network nextcloud_net ^
--e MYSQL_ROOT_PASSWORD=RootPass123 ^
--e MYSQL_DATABASE=nextcloud ^
--e MYSQL_USER=nextcloud ^
--e MYSQL_PASSWORD=NextcloudPass ^
--v nextcloud_db:/var/lib/mysql ^
-mariadb:10.6
+Verify network
+
+<div class="block">
+docker network ls
+</div>
+
+<div class="output">
+
+NETWORK ID NAME DRIVER  
+abcd1234 bridge bridge  
+efgh5678 nextcloud_net bridge  
+
+</div>
+
 </div>
 
 ---
 
-<h2>Start Nextcloud</h2>
+<div class="step" id="nextcloud">
 
-<div class="code">
-<span class="copy" onclick="copy(this)">copy</span>
+<h2>Step 8 — Run Nextcloud Container</h2>
+
+<b>WHERE TO RUN</b>
+
+<div class="block">
+PowerShell
+</div>
+
+<b>INPUT</b>
+
+<div class="block">
+
 docker run -d ^
 --name nextcloud ^
 --network nextcloud_net ^
 -p 8080:80 ^
--v nextcloud_data:/var/www/html ^
--v D:/CloudStorage:/mnt/cloud ^
-nextcloud:28
+nextcloud
+
 </div>
 
----
+<b>VERIFY</b>
 
-<h2 id="tunnel">Install Cloudflare Tunnel</h2>
-
-<div class="code">
-<span class="copy" onclick="copy(this)">copy</span>
-docker run -d ^
---name cloudflared ^
---network nextcloud_net ^
-cloudflare/cloudflared ^
-tunnel --url http://nextcloud:80
-</div>
-
-Example output:
-
-<div class="code">
-https://random-server.trycloudflare.com
-</div>
-
----
-
-<h2 id="upload">Upload Files</h2>
-
-<ul>
-<li>Browser upload</li>
-<li>Nextcloud mobile app</li>
-<li>Copy to local folder</li>
-</ul>
-
-Example folder:
-
-<div class="code">
-D:\CloudStorage
-</div>
-
----
-
-<h2 id="backup">Backup Strategy</h2>
-
-Backup this folder:
-
-<div class="code">
-D:\CloudStorage
-</div>
-
-Recommended backup:
-
-<ul>
-<li>External HDD</li>
-<li>NAS</li>
-<li>Another PC</li>
-</ul>
-
----
-
-<h2 id="faq">FAQ & Troubleshooting</h2>
-
-<div class="faq" onclick="toggle(this)">
-Docker command not working
-<div class="answer">
-Run:<br>
-docker version
-</div>
-</div>
-
-<div class="faq" onclick="toggle(this)">
-Nextcloud page not loading
-<div class="answer">
-Check containers:<br>
+<div class="block">
 docker ps
 </div>
-</div>
 
-<div class="faq" onclick="toggle(this)">
-Tunnel link not working
-<div class="answer">
-Check logs:<br>
-docker logs cloudflared
-</div>
-</div>
+<b>EXPECTED OUTPUT</b>
+
+<div class="output">
+
+CONTAINER ID IMAGE NAME  
+abc123 nextcloud nextcloud  
 
 </div>
 
-<script>
+</div>
 
-function copy(btn){
-let code=btn.parentElement.innerText.replace("copy","");
-navigator.clipboard.writeText(code)
-btn.innerText="copied"
-setTimeout(()=>btn.innerText="copy",1000)
-}
+---
 
-function toggle(el){
-let ans=el.querySelector(".answer")
-ans.style.display=ans.style.display==="block"?"none":"block"
-}
+<div class="step" id="local">
 
-function toggleDark(){
-document.body.classList.toggle("dark")
-}
+<h2>Step 9 — Access Your Local Cloud</h2>
 
-</script>
+Open your browser and go to
+
+<div class="block">
+http://localhost:8080
+</div>
+
+or
+
+<div class="block">
+http://192.168.29.143:8080
+</div>
+
+You should see the **Nextcloud setup screen**.
+
+</div>
+
+---
+
+<div class="step">
+
+<h2>Stage 1 Complete</h2>
+
+Your personal cloud server is now running locally.
+
+Next we will expose it to the internet using Cloudflare Tunnel.
+
+</div>
+
+</div>
 
 </body>
 </html>
